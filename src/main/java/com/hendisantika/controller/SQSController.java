@@ -9,6 +9,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -26,6 +27,8 @@ public class SQSController {
     private static final String QUEUE_PREFIX = "MyAWSPlanetSQS-";
     private static final SqsClient SQS_CLIENT = SqsClient.builder().region(Region.AP_SOUTHEAST_1).build();
     private static String queueUrl;
+    private static final String DLQ_QUEUE_NAME = "MyAWSPlanetSQS-DLQ";
+    private static String dlqQueueUrl;
 
     @GetMapping("/createQueue")
     public void createQueue() {
@@ -97,5 +100,40 @@ public class SQSController {
             SQS_CLIENT.deleteMessage(deleteMessageRequest);
         }
         return messages;
+    }
+
+    @GetMapping("createDLQ")
+    public void createDLQ() {
+        // Create the DLQ
+        CreateQueueRequest createQueueRequest = CreateQueueRequest.builder()
+                .queueName(DLQ_QUEUE_NAME)
+                .build();
+
+        SQS_CLIENT.createQueue(createQueueRequest);
+
+        GetQueueUrlResponse getQueueUrlResponse =
+                SQS_CLIENT.getQueueUrl(GetQueueUrlRequest.builder()
+                        .queueName(DLQ_QUEUE_NAME)
+                        .build());
+        dlqQueueUrl = getQueueUrlResponse.queueUrl();
+
+        // Link the DLQ to the source queue
+        GetQueueAttributesResponse queueAttributes = SQS_CLIENT.getQueueAttributes(GetQueueAttributesRequest.builder()
+                .queueUrl(DLQ_QUEUE_NAME)
+                .attributeNames(QueueAttributeName.QUEUE_ARN)
+                .build());
+        String dlqArn = queueAttributes.attributes().get(QueueAttributeName.QUEUE_ARN);
+
+        // Specify the Redrive Policy
+        HashMap<QueueAttributeName, String> attributes = new HashMap<QueueAttributeName, String>();
+        attributes.put(QueueAttributeName.REDRIVE_POLICY, "{\"maxReceiveCount\":\"3\", \"deadLetterTargetArn\":\""
+                + dlqArn + "\"}");
+
+        SetQueueAttributesRequest setAttrRequest = SetQueueAttributesRequest.builder()
+                .queueUrl(queueUrl)
+                .attributes(attributes)
+                .build();
+
+        SetQueueAttributesResponse setAttrResponse = SQS_CLIENT.setQueueAttributes(setAttrRequest);
     }
 }
