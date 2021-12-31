@@ -7,14 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
-import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
-import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
-import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
-import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
-import software.amazon.awssdk.services.sqs.model.Message;
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import software.amazon.awssdk.services.sqs.model.*;
 
 import java.util.List;
 
@@ -83,6 +76,25 @@ public class SQSController {
         String messages = "";
         for (Message receivedMessage : receivedMessages) {
             messages += receivedMessage.body() + "\n";
+        }
+        return messages;
+    }
+
+    @GetMapping("receiveMessagesWithDelete")
+    public String receiveMessagesWithDelete() {
+        ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .build();
+        List<Message> receivedMessages = SQS_CLIENT.receiveMessage(receiveMessageRequest).messages();
+
+        String messages = "";
+        for (Message receivedMessage : receivedMessages) {
+            messages += receivedMessage.body() + "\n";
+            DeleteMessageRequest deleteMessageRequest = DeleteMessageRequest.builder()
+                    .queueUrl(queueUrl)
+                    .receiptHandle(receivedMessage.receiptHandle())
+                    .build();
+            SQS_CLIENT.deleteMessage(deleteMessageRequest);
         }
         return messages;
     }
