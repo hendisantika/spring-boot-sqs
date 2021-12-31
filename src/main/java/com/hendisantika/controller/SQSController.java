@@ -195,4 +195,13 @@ public class SQSController {
         }
         return messages;
     }
+
+    @GetMapping("/deleteQueue")
+    public void deleteQueue() {
+        DeleteQueueRequest deleteQueueRequest = DeleteQueueRequest.builder()
+                .queueUrl(queueUrl)
+                .build();
+
+        SQS_CLIENT.deleteQueue(deleteQueueRequest);
+    }
 }
