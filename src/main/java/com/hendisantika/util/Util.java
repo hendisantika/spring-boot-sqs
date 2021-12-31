@@ -1,7 +1,10 @@
 package com.hendisantika.util;
 
+import com.hendisantika.model.ServiceResponse;
+import com.hendisantika.model.StatusCode;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,5 +36,13 @@ public class Util {
                 mapperObjects.stream().map(u -> convertClass(u, targetClass)).collect(Collectors.toList());
 
         return dtoObjects;
+    }
+
+    public static ServiceResponse prepareSuccessResponse(Object data) {
+        ServiceResponse response = new ServiceResponse();
+        response.setBody(data);
+        response.setStatus(HttpStatus.OK);
+        response.setStatusCode(StatusCode.SUCCESS);
+        return response;
     }
 }
