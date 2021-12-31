@@ -8,6 +8,8 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
+import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
+import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 
 /**
  * Created by IntelliJ IDEA.
@@ -38,5 +40,20 @@ public class SQSController {
         GetQueueUrlResponse getQueueUrlResponse =
                 SQS_CLIENT.getQueueUrl(GetQueueUrlRequest.builder().queueName(queueName).build());
         queueUrl = getQueueUrlResponse.queueUrl();
+    }
+
+    @GetMapping("listQueues")
+    public String listQueues() {
+        ListQueuesRequest listQueuesRequest = ListQueuesRequest.builder()
+                .queueNamePrefix(QUEUE_PREFIX)
+                .build();
+        ListQueuesResponse listQueuesResponse = SQS_CLIENT.listQueues(listQueuesRequest);
+
+        String queues = "";
+        for (String url : listQueuesResponse.queueUrls()) {
+            queues += url + "\n";
+        }
+
+        return queues;
     }
 }
