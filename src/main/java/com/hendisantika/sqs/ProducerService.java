@@ -23,4 +23,9 @@ public class ProducerService {
     AmazonSqsClient amazonSQSClient;
     @Autowired
     private JmsTemplate defaultJmsTemplate;
+
+    public void send(String queueName, String requestBody) {
+        LOG.info("Send to {} message --> {}", queueName, requestBody);
+        defaultJmsTemplate.convertAndSend(queueName, requestBody);
+    }
 }
