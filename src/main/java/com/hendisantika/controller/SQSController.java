@@ -1,5 +1,9 @@
 package com.hendisantika.controller;
 
+import com.hendisantika.model.ServiceResponse;
+import com.hendisantika.model.StatusCode;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -203,5 +207,16 @@ public class SQSController {
                 .build();
 
         SQS_CLIENT.deleteQueue(deleteQueueRequest);
+    }
+
+    @GetMapping
+    public ResponseEntity<ServiceResponse> index() throws Exception {
+        ServiceResponse serviceResponse = new ServiceResponse();
+
+        serviceResponse.setBody("Welcome to AWS RnD Java Project");
+        serviceResponse.setStatus(HttpStatus.OK);
+        serviceResponse.setStatusCode(StatusCode.SUCCESS);
+
+        return ResponseEntity.ok(serviceResponse);
     }
 }
