@@ -152,4 +152,27 @@ public class SQSController {
                 .build();
         SQS_CLIENT.changeMessageVisibility(visibilityRequest);
     }
+
+    @GetMapping("/createQueueWithLongPolling")
+    public void createQueueWithLongPolling() {
+        String queueName = QUEUE_PREFIX + System.currentTimeMillis();
+
+        CreateQueueRequest createQueueRequest = CreateQueueRequest.builder().queueName(queueName).build();
+
+        SQS_CLIENT.createQueue(createQueueRequest);
+
+        GetQueueUrlResponse getQueueUrlResponse =
+                SQS_CLIENT.getQueueUrl(GetQueueUrlRequest.builder().queueName(queueName).build());
+        queueUrl = getQueueUrlResponse.queueUrl();
+
+        HashMap<QueueAttributeName, String> attributes = new HashMap<QueueAttributeName, String>();
+        attributes.put(QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS, "20");
+
+        SetQueueAttributesRequest setAttrsRequest = SetQueueAttributesRequest.builder()
+                .queueUrl(queueUrl)
+                .attributes(attributes)
+                .build();
+
+        SQS_CLIENT.setQueueAttributes(setAttrsRequest);
+    }
 }
