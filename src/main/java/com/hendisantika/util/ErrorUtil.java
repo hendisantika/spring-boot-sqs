@@ -44,4 +44,11 @@ public class ErrorUtil {
         errorList.add(errorModel);
         return errorList;
     }
+
+    public static List<ErrorModel> prepareErrorResponse(String message) {
+        ErrorModel errorModel = new ErrorModel(message);
+        List<ErrorModel> errorList = new ArrayList<>();
+        errorList.add(errorModel);
+        return errorList;
+    }
 }
