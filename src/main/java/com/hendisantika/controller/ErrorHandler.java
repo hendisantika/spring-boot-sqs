@@ -2,6 +2,7 @@ package com.hendisantika.controller;
 
 import com.hendisantika.model.ServiceResponse;
 import com.hendisantika.model.StatusCode;
+import com.hendisantika.util.ErrorUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
