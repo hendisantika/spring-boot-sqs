@@ -3,6 +3,9 @@ package com.hendisantika.util;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Created by IntelliJ IDEA.
  * Project : spring-boot-sqs
@@ -23,5 +26,12 @@ public class Util {
     public static <Source, Dest> void copyProperty(Source source, Dest target) {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         modelMapper.map(source, target);
+    }
+
+    public static <U, V> List<V> toDtoList(List<U> mapperObjects, Class<V> targetClass) {
+        List<V> dtoObjects =
+                mapperObjects.stream().map(u -> convertClass(u, targetClass)).collect(Collectors.toList());
+
+        return dtoObjects;
     }
 }
