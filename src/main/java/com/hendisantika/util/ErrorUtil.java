@@ -38,4 +38,10 @@ public class ErrorUtil {
         return response;
     }
 
+    public static List<ErrorModel> prepareInternalServerErrorResponse() {
+        ErrorModel errorModel = new ErrorModel("Internal server Error", "", "Internal server Error");
+        List<ErrorModel> errorList = new ArrayList<>();
+        errorList.add(errorModel);
+        return errorList;
+    }
 }
