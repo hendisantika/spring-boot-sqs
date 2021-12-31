@@ -136,4 +136,20 @@ public class SQSController {
 
         SetQueueAttributesResponse setAttrResponse = SQS_CLIENT.setQueueAttributes(setAttrRequest);
     }
+
+    @GetMapping("receiveMessagesWithoutDeleteLimitedVisibilityTimeout")
+    public void receiveMessagesWithoutDeleteLimitedVisibilityTimeout() {
+        ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder().queueUrl(queueUrl).build();
+        String receipt = SQS_CLIENT.receiveMessage(receiveMessageRequest)
+                .messages()
+                .get(0)
+                .receiptHandle();
+
+        ChangeMessageVisibilityRequest visibilityRequest = ChangeMessageVisibilityRequest.builder()
+                .queueUrl(queueUrl)
+                .receiptHandle(receipt)
+                .visibilityTimeout(5)
+                .build();
+        SQS_CLIENT.changeMessageVisibility(visibilityRequest);
+    }
 }
