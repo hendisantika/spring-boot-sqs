@@ -1,9 +1,12 @@
 package com.hendisantika.sqs;
 
+import com.amazon.sqs.javamessaging.ProviderConfiguration;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,6 +22,13 @@ import org.springframework.jms.annotation.EnableJms;
 public class JmsConfig {
 
     @Autowired
-    AmazonSqsClient amazonSQSClient;
+    private AmazonSqsClient amazonSQSClient;
     private SQSConnectionFactory connectionFactory;
+
+    @PostConstruct
+    public void init() {
+        ProviderConfiguration providerConfiguration = new ProviderConfiguration();
+        connectionFactory =
+                new SQSConnectionFactory(providerConfiguration, amazonSQSClient.getClient());
+    }
 }
