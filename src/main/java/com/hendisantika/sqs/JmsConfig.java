@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 
 import javax.annotation.PostConstruct;
@@ -44,5 +45,10 @@ public class JmsConfig {
         factory.setConcurrency("3-10");
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         return factory;
+    }
+
+    @Bean
+    public JmsTemplate defaultJmsTemplate() {
+        return new JmsTemplate(this.connectionFactory);
     }
 }
