@@ -175,4 +175,24 @@ public class SQSController {
 
         SQS_CLIENT.setQueueAttributes(setAttrsRequest);
     }
+
+    @GetMapping("receiveMessagesWithLongPolling")
+    public String receiveMessagesWithLongPolling() {
+        ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .waitTimeSeconds(20)
+                .build();
+        List<Message> receivedMessages = SQS_CLIENT.receiveMessage(receiveMessageRequest).messages();
+
+        String messages = "";
+        for (Message receivedMessage : receivedMessages) {
+            messages += receivedMessage.body() + "\n";
+            DeleteMessageRequest deleteMessageRequest = DeleteMessageRequest.builder()
+                    .queueUrl(queueUrl)
+                    .receiptHandle(receivedMessage.receiptHandle())
+                    .build();
+            SQS_CLIENT.deleteMessage(deleteMessageRequest);
+        }
+        return messages;
+    }
 }
