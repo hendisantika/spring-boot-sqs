@@ -23,4 +23,8 @@ public class ErrorModel implements Serializable {
     private String message;
     private String field;
     private String description;
+
+    public ErrorModel(String message) {
+        this.message = message;
+    }
 }

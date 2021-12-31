@@ -51,4 +51,13 @@ public class ErrorUtil {
         errorList.add(errorModel);
         return errorList;
     }
+
+    public static ServiceResponse prepareErrorResponse(String message, HttpStatus status) {
+        ServiceResponse response = new ServiceResponse();
+        response.setBody(null);
+        response.setErrorList(prepareErrorResponse(message));
+        response.setStatus(status);
+        response.setStatusCode(StatusCode.ERROR);
+        return response;
+    }
 }
