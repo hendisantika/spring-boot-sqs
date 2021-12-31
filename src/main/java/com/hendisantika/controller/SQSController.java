@@ -1,7 +1,9 @@
 package com.hendisantika.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -10,6 +12,7 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
 import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 /**
  * Created by IntelliJ IDEA.
@@ -55,5 +58,14 @@ public class SQSController {
         }
 
         return queues;
+    }
+
+    @PostMapping("sendMessage")
+    public void sendMessage(@RequestParam("text") String text) {
+        SendMessageRequest messageRequest = SendMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .messageBody(text)
+                .build();
+        SQS_CLIENT.sendMessage(messageRequest);
     }
 }
