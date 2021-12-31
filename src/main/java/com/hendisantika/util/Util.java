@@ -19,4 +19,9 @@ public class Util {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         return modelMapper.map(mapperObject, targetClass);
     }
+
+    public static <Source, Dest> void copyProperty(Source source, Dest target) {
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        modelMapper.map(source, target);
+    }
 }
