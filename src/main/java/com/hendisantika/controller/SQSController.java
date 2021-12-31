@@ -12,7 +12,11 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
 import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
+import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -67,5 +71,19 @@ public class SQSController {
                 .messageBody(text)
                 .build();
         SQS_CLIENT.sendMessage(messageRequest);
+    }
+
+    @GetMapping("receiveMessagesWithoutDelete")
+    public String receiveMessagesWithoutDelete() {
+        ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .build();
+        List<Message> receivedMessages = SQS_CLIENT.receiveMessage(receiveMessageRequest).messages();
+
+        String messages = "";
+        for (Message receivedMessage : receivedMessages) {
+            messages += receivedMessage.body() + "\n";
+        }
+        return messages;
     }
 }
