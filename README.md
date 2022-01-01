@@ -104,3 +104,78 @@ public class AmazonSqsClient {
   }
 }
 ```
+
+I will configure the SQS client, so my application can communicate with the queue.
+
+JMS configuration
+
+```java
+@Configuration
+@EnableJms
+public class JmsConfig {
+
+  @Autowired AmazonSqsClient amazonSQSClient;
+  private SQSConnectionFactory connectionFactory;
+
+  @PostConstruct
+  public void init() {
+    ProviderConfiguration providerConfiguration = new ProviderConfiguration();
+    connectionFactory =
+        new SQSConnectionFactory(providerConfiguration, amazonSQSClient.getClient());
+  }
+
+  @Bean
+  public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+    factory.setConnectionFactory(this.connectionFactory);
+    factory.setDestinationResolver(new DynamicDestinationResolver());
+    factory.setConcurrency("3-10");
+    factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+    return factory;
+  }
+
+  @Bean
+  public JmsTemplate defaultJmsTemplate() {
+    return new JmsTemplate(this.connectionFactory);
+  }
+}
+```
+
+The consumer will have @JmsListene annotation. It will pull messages from the queue. Inside the process method, we can
+add any code to process this message.
+
+```java
+@JmsListener(destination = "${queue.order}")
+public void process(String data) {
+  LOG.info("Received message " + data);
+}
+```
+
+The producer can send a single message or batch message.
+
+```java
+@Autowired private JmsTemplate defaultJmsTemplate;
+
+@Autowired AmazonSqsClient amazonSQSClient;
+
+public void send(String queueName, String requestBody) {
+  LOG.info("Send to {} message --> {}", queueName, requestBody);
+  defaultJmsTemplate.convertAndSend(queueName, requestBody);
+}public void sendMultiple() {
+  SendMessageBatchRequestEntry[] dataArray = new SendMessageBatchRequestEntry[10];
+  for (int i = 0; i < 10; i++) {
+    dataArray[i] =
+        new SendMessageBatchRequestEntry(UUID.randomUUID().toString(), "Hello from message " + i);
+  }
+
+  LOG.info("Sending batch message to order queue");
+
+  SendMessageBatchRequest sendBatchRequest =
+      new SendMessageBatchRequest()
+          .withQueueUrl("queue-url")
+          .withEntries(dataArray);
+  amazonSQSClient.getClient().sendMessageBatch(sendBatchRequest);
+}
+```
+
+A batch message will save cost and time.
