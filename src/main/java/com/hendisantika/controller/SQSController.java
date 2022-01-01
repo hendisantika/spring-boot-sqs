@@ -2,6 +2,8 @@ package com.hendisantika.controller;
 
 import com.hendisantika.model.ServiceResponse;
 import com.hendisantika.model.StatusCode;
+import com.hendisantika.sqs.ProducerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,9 +32,14 @@ import java.util.List;
 public class SQSController {
     private static final String QUEUE_PREFIX = "MyAWSPlanetSQS-";
     private static final SqsClient SQS_CLIENT = SqsClient.builder().region(Region.AP_SOUTHEAST_1).build();
-    private static String queueUrl;
+    private static String queueUrl = "https://sqs.ap-southeast-1.amazonaws" +
+            ".com/267023985114/MyAWSPlanetSQS-1640994237552";
     private static final String DLQ_QUEUE_NAME = "MyAWSPlanetSQS-DLQ";
-    private static String dlqQueueUrl;
+    private static String dlqQueueUrl = "https://sqs.ap-southeast-1.amazonaws" +
+            ".com/267023985114/MyAWSPlanetSQS-1640994237552";
+
+    @Autowired
+    private ProducerService producerService;
 
     @GetMapping("/createQueue")
     public void createQueue() {
@@ -49,7 +56,7 @@ public class SQSController {
         queueUrl = getQueueUrlResponse.queueUrl();
     }
 
-    @GetMapping("listQueues")
+    @GetMapping("/listQueues")
     public String listQueues() {
         ListQueuesRequest listQueuesRequest = ListQueuesRequest.builder()
                 .queueNamePrefix(QUEUE_PREFIX)
@@ -64,7 +71,7 @@ public class SQSController {
         return queues;
     }
 
-    @PostMapping("sendMessage")
+    @PostMapping("/sendMessage")
     public void sendMessage(@RequestParam("text") String text) {
         SendMessageRequest messageRequest = SendMessageRequest.builder()
                 .queueUrl(queueUrl)
@@ -73,7 +80,7 @@ public class SQSController {
         SQS_CLIENT.sendMessage(messageRequest);
     }
 
-    @GetMapping("receiveMessagesWithoutDelete")
+    @GetMapping("/receiveMessagesWithoutDelete")
     public String receiveMessagesWithoutDelete() {
         ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)
@@ -87,7 +94,7 @@ public class SQSController {
         return messages;
     }
 
-    @GetMapping("receiveMessagesWithDelete")
+    @GetMapping("/receiveMessagesWithDelete")
     public String receiveMessagesWithDelete() {
         ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)
@@ -106,7 +113,7 @@ public class SQSController {
         return messages;
     }
 
-    @GetMapping("createDLQ")
+    @GetMapping("/createDLQ")
     public void createDLQ() {
         // Create the DLQ
         CreateQueueRequest createQueueRequest = CreateQueueRequest.builder()
@@ -141,7 +148,7 @@ public class SQSController {
         SetQueueAttributesResponse setAttrResponse = SQS_CLIENT.setQueueAttributes(setAttrRequest);
     }
 
-    @GetMapping("receiveMessagesWithoutDeleteLimitedVisibilityTimeout")
+    @GetMapping("/receiveMessagesWithoutDeleteLimitedVisibilityTimeout")
     public void receiveMessagesWithoutDeleteLimitedVisibilityTimeout() {
         ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder().queueUrl(queueUrl).build();
         String receipt = SQS_CLIENT.receiveMessage(receiveMessageRequest)
@@ -180,7 +187,7 @@ public class SQSController {
         SQS_CLIENT.setQueueAttributes(setAttrsRequest);
     }
 
-    @GetMapping("receiveMessagesWithLongPolling")
+    @GetMapping("/receiveMessagesWithLongPolling")
     public String receiveMessagesWithLongPolling() {
         ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)
@@ -214,6 +221,19 @@ public class SQSController {
         ServiceResponse serviceResponse = new ServiceResponse();
 
         serviceResponse.setBody("Welcome to AWS RnD Java Project");
+        serviceResponse.setStatus(HttpStatus.OK);
+        serviceResponse.setStatusCode(StatusCode.SUCCESS);
+
+        return ResponseEntity.ok(serviceResponse);
+    }
+
+    @PostMapping
+    public ResponseEntity<ServiceResponse> sendMessage(@RequestParam String queueName,
+                                                       @RequestParam String requestBody) {
+        ServiceResponse serviceResponse = new ServiceResponse();
+
+        producerService.send(queueName, requestBody);
+        serviceResponse.setBody("Send Message to AWS SQS");
         serviceResponse.setStatus(HttpStatus.OK);
         serviceResponse.setStatusCode(StatusCode.SUCCESS);
 
