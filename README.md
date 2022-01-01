@@ -58,3 +58,49 @@ Message retention period: Message will be deleted automatically after a time.
 Maximum message size: Max size of the payload.
 
 After creating the queue, I will add maven dependencies in pom.xml
+
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-jms</artifactId>
+</dependency>
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk</artifactId>
+    <version>1.12.70</version>
+</dependency>
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>amazon-sqs-java-messaging-lib</artifactId>
+    <version>1.0.8</version>
+    <type>jar</type>
+</dependency>
+```
+
+### Client configuration
+
+```java
+@Service
+public class AmazonSqsClient {
+
+  private AmazonSQS client;
+
+  @PostConstruct
+  private void initializeAmazonSqsClient() {
+    this.client =
+        AmazonSQSClientBuilder.standard()
+            .withCredentials(getAwsCredentialProvider())
+            .withRegion(Region.getRegion(Regions.AP_SOUTHEAST_1).getName())
+            .build();
+  }
+
+  private AWSCredentialsProvider getAwsCredentialProvider() {
+    AWSCredentials awsCredentials = new BasicAWSCredentials("access-key", "secret-key");
+    return new AWSStaticCredentialsProvider(awsCredentials);
+  }
+
+  public AmazonSQS getClient() {
+    return client;
+  }
+}
+```
