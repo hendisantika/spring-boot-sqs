@@ -1,5 +1,5 @@
 # How to Use AWS SQS With Sprint Boot
-
+![Spring Boot AWS SQS](img/sqs.jpeg)
 ### First, let’s see some benefits of SQS.
 
 1. We do not have to manage SQS. AWS will do all the management tasks.
@@ -42,6 +42,13 @@
    requests or why the requests failed.
 
 ### Integrating AWS SQS with Spring Boot
+
+Create SQS Queue
+![Create SQS Queue](img/create-queue.png "Create SQS Queue")
+
+Config SQS Queue
+
+![Config SQS Queue](img/sqs.jpeg "Config SQS Queue")
 
 First, I will create a queue in SQS. Initially, I will select queue type. This type cannot be changed after creation. I
 am selecting the standard type. The queue name is Order.
@@ -179,3 +186,9 @@ public void send(String queueName, String requestBody) {
 ```
 
 A batch message will save cost and time.
+
+Output
+
+![Output](img/output1.png "Output")
+
+![Output](img/output2.png "Output")
